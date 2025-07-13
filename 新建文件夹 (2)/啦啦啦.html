@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网址导航 - 本地搜索版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --game-color: #ff6b6b;
+            --search-color: #6a5acd;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        .dark-mode {
+            --primary-color: #4895ef;
+            --secondary-color: #4361ee;
+            --accent-color: #4cc9f0;
+            --game-color: #ff6b6b;
+            --search-color: #7b68ee;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --border-color: #333333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            min-height: 100vh;
+            padding: 20px;
+            background-image: linear-gradient(135deg, var(--bg-color) 0%, rgba(0,0,0,0.02) 100%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .theme-toggle, .add-site-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        
+        .theme-toggle:hover, .add-site-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .game-section {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 107, 107, 0.05));
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            color: var(--game-color);
+        }
+        
+        .section-title i {
+            font-size: 1.8rem;
+        }
+        
+        .search-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--search-color), var(--accent-color));
+        }
+        
+        .search-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            color: var(--search-color);
+        }
+        
+        .search-box {
+            display: flex;
+            max-width: 700px;
+            margin: 0 auto;
+            height: 60px;
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .search-box:focus-within {
+            border-color: var(--search-color);
+            box-shadow: 0 6px 15px rgba(106, 90, 205, 0.2);
+        }
+        
+        .search-input {
+            flex: 1;
+            border: none;
+            padding: 0 25px;
+            font-size: 1.1rem;
+            outline: none;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+        
+        .search-input:focus {
+            background-color: rgba(106, 90, 205, 0.05);
+        }
+        
+        .search-btn {
+            width: 120px;
+            background: var(--search-color);
+            color: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .search-btn:hover {
+            background: #5a4acd;
+        }
+        
+        .search-info {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .categories {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding: 5px 0;
+        }
+        
+        .category-btn {
+            padding: 10px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .category-btn.active, .category-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .games-btn {
+            background: rgba(255, 107, 107, 0.1);
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+        
+        .games-btn.active, .games-btn:hover {
+            background: var(--game-color);
+            border-color: var(--game-color);
+        }
+        
+        .websites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .website-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .website-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .website-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+        
+        .game-card::before {
+            background: linear-gradient(90deg, var(--game-color), #ff8e8e);
+        }
+        
+        .website-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.8rem;
+            transition: var(--transition);
+        }
+        
+        .game-card .website-icon {
+            background: linear-gradient(135deg, var(--game-color), #ff8e8e);
+        }
+        
+        .website-card:hover .website-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .website-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            flex-grow: 1;
+        }
+        
+        .website-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+        
+        .website-category {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .game-card .website-category {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--game-color);
+        }
+        
+        .visit-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            max-width: 140px;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .game-card .visit-btn {
+            background: var(--game-color);
+        }
+        
+        .visit-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+        
+        .game-card .visit-btn:hover {
+            background: #ff5252;
+        }
+        
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        
+        .add-site-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        
+        .close-modal:hover {
+            color: var(--primary-color);
+            transform: rotate(90deg);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .search-box {
+                flex-direction: column;
+                height: auto;
+                border-radius: 16px;
+            }
+            
+            .search-input {
+                padding: 15px;
+                border-radius: 0;
+            }
+            
+            .search-btn {
+                width: 100%;
+                padding: 15px;
+                border-radius: 0 0 16px 16px;
+            }
+            
+            .websites-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-gamepad"></i>
+                <h1>网址导航</h1>
+            </div>
+            <div class="header-controls">
+                <button class="add-site-btn" id="addSiteBtn">
+                    <i class="fas fa-plus"></i>
+                    <span>添加网站</span>
+                </button>
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                    <span>深色模式</span>
+                </button>
+            </div>
+        </header>
+        
+        <section class="game-section">
+            <h2 class="section-title">
+                <i class="fas fa-gamepad"></i>
+                热门游戏平台
+            </h2>
+            <div class="websites-grid">
+                <div class="website-card game-card">
+                    <div class="website-icon">
+                        <i class="fab fa-steam"></i>
+                    </div>
+                    <div class="website-name">Steam</div>
+                    <div class="website-desc">全球最大的游戏平台</div>
+                    <span class="website-category">游戏</span>
+                    <a href="https://store.steampowered.com" target="_blank" class="visit-btn">访问网站</a>
+                </div>
+                
+                <div class="website-card game-card">
+                    <div class="website-icon">
+                        <i class="fab fa-xbox"></i>
+                    </div>
+                    <div class="website-name">Xbox</div>
+                    <div class="website-desc">微软游戏平台</div>
+                    <span class="website-category">游戏</span>
+                    <a href="https://www.xbox.com" target="_blank" class="visit-btn">访问网站</a>
+                </div>
+                
+                <div class="website-card game-card">
+                    <div class="website-icon">
+                        <i class="fab fa-playstation"></i>
+                    </div>
+                    <div class="website-name">PlayStation</div>
+                    <div class="website-desc">索尼游戏平台</div>
+                    <span class="website-category">游戏</span>
+                    <a href="https://www.playstation.com" target="_blank" class="visit-btn">访问网站</a>
+                </div>
+                
+                <div class="website-card game-card">
+                    <div class="website-icon">
+                        <i class="fas fa-ghost"></i>
+                    </div>
+                    <div class="website-name">Epic Games</div>
+                    <div class="website-desc">每周免费游戏平台</div>
+                    <span class="website-category">游戏</span>
+                    <a href="https://www.epicgames.com" target="_blank" class="visit-btn">访问网站</a>
+                </div>
+            </div>
+        </section>
+        
+        <section class="search-section">
+            <h2 class="search-title">搜索已添加的网站</h2>
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="输入网站名称、描述或分类...">
+                <button class="search-btn" id="searchButton">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+            </div>
+            <div class="search-info" id="searchInfo">搜索所有已添加的网站</div>
+        </section>
+        
+        <div class="categories">
+            <button class="category-btn active" data-category="all">全部</button>
+            <button class="category-btn games-btn" data-category="games">游戏</button>
+            <button class="category-btn" data-category="social">社交</button>
+            <button class="category-btn" data-category="shopping">购物</button>
+            <button class="category-btn" data-category="entertainment">娱乐</button>
+            <button class="category-btn" data-category="news">新闻</button>
+            <button class="category-btn" data-category="education">学习</button>
+            <button class="category-btn" data-category="tools">工具</button>
+            <button class="category-btn" data-category="work">工作</button>
+        </div>
+        
+        <div class="websites-grid" id="websitesContainer">
+            <!-- 网站卡片将通过JavaScript动态生成 -->
+        </div>
+        
+        <footer>
+            <p>© 2023 网址导航 | 您的个性化上网入口 | 已收藏 <span id="siteCount">0</span> 个实用网站</p>
+        </footer>
+    </div>
+    
+    <!-- 添加网站模态框 -->
+    <div class="add-site-modal" id="addSiteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">添加新网站</h3>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <form id="addSiteForm">
+                <div class="form-group">
+                    <label for="siteName">网站名称</label>
+                    <input type="text" class="form-control" id="siteName" placeholder="例如：Steam" required>
+                </div>
+                <div class="form-group">
+                    <label for="siteUrl">网站地址</label>
+                    <input type="url" class="form-control" id="siteUrl" placeholder="https://www.example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="siteDesc">网站描述</label>
+                    <input type="text" class="form-control" id="siteDesc" placeholder="网站的主要功能或特点">
+                </div>
+                <div class="form-group">
+                    <label for="siteCategory">分类</label>
+                    <select class="form-control" id="siteCategory" required>
+                        <option value="games">游戏</option>
+                        <option value="social">社交</option>
+                        <option value="shopping">购物</option>
+                        <option value="entertainment">娱乐</option>
+                        <option value="news">新闻</option>
+                        <option value="education">学习</option>
+                        <option value="tools">工具</option>
+                        <option value="work">工作</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="siteIcon">图标类名 (Font Awesome)</label>
+                    <input type="text" class="form-control" id="siteIcon" placeholder="例如：fab fa-steam">
+                    <small>访问 <a href="https://fontawesome.com/icons" target="_blank">Font Awesome</a> 查找图标</small>
+                </div>
+                <button type="submit" class="submit-btn">添加网站</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // 网站数据
+        let websites = [
+            { name: "Steam", url: "https://store.steampowered.com", icon: "fab fa-steam", desc: "全球最大的游戏平台", category: "games" },
+            { name: "Epic Games", url: "https://www.epicgames.com", icon: "fas fa-ghost", desc: "每周免费游戏平台", category: "games" },
+            { name: "Battle.net", url: "https://www.blizzard.com", icon: "fab fa-battle-net", desc: "暴雪游戏平台", category: "games" },
+            { name: "Origin", url: "https://www.origin.com", icon: "fas fa-dragon", desc: "EA游戏平台", category: "games" },
+            { name: "微信", url: "https://wx.qq.com", icon: "fab fa-weixin", desc: "即时通讯应用", category: "social" },
+            { name: "微博", url: "https://weibo.com", icon: "fab fa-weibo", desc: "社交媒体平台", category: "social" },
+            { name: "知乎", url: "https://www.zhihu.com", icon: "fas fa-question-circle", desc: "问答社区", category: "social" },
+            { name: "豆瓣", url: "https://www.douban.com", icon: "fas fa-book", desc: "图书电影音乐社区", category: "social" },
+            { name: "淘宝", url: "https://www.taobao.com", icon: "fas fa-shopping-cart", desc: "综合购物平台", category: "shopping" },
+            { name: "京东", url: "https://www.jd.com", icon: "fas fa-box", desc: "综合购物平台", category: "shopping" },
+            { name: "拼多多", url: "https://www.pinduoduo.com", icon: "fas fa-shopping-bag", desc: "团购电商平台", category: "shopping" },
+            { name: "网易云音乐", url: "https://music.163.com", icon: "fas fa-music", desc: "音乐播放平台", category: "entertainment" },
+            { name: "哔哩哔哩", url: "https://www.bilibili.com", icon: "fas fa-play-circle", desc: "视频分享平台", category: "entertainment" },
+            { name: "腾讯视频", url: "https://v.qq.com", icon: "fas fa-film", desc: "视频播放平台", category: "entertainment" },
+            { name: "爱奇艺", url: "https://www.iqiyi.com", icon: "fas fa-tv", desc: "视频播放平台", category: "entertainment" },
+            { name: "新浪新闻", url: "https://news.sina.com.cn", icon: "fas fa-newspaper", desc: "综合新闻门户", category: "news" },
+            { name: "澎湃新闻", url: "https://www.thepaper.cn", icon: "fas fa-globe-asia", desc: "新闻与思想平台", category: "news" },
+            { name: "36氪", url: "https://36kr.com", icon: "fas fa-chart-line", desc: "商业新闻媒体", category: "news" },
+            { name: "中国大学MOOC", url: "https://www.icourse163.org", icon: "fas fa-graduation-cap", desc: "在线学习平台", category: "education" },
+            { name: "Coursera", url: "https://www.coursera.org", icon: "fas fa-laptop-code", desc: "国际在线课程", category: "education" },
+            { name: "GitHub", url: "https://github.com", icon: "fab fa-github", desc: "代码托管平台", category: "tools" },
+            { name: "ProcessOn", url: "https://www.processon.com", icon: "fas fa-project-diagram", desc: "在线作图工具", category: "tools" },
+            { name: "Canva", url: "https://www.canva.cn", icon: "fas fa-paint-brush", desc: "在线设计平台", category: "tools" },
+            { name: "石墨文档", url: "https://shimo.im", icon: "fas fa-file-alt", desc: "在线协作文档", category: "work" },
+            { name: "百度翻译", url: "https://fanyi.baidu.com", icon: "fas fa-language", desc: "在线翻译工具", category: "tools" }
+        ];
+        
+        // 尝试从本地存储加载网站数据
+        const savedWebsites = localStorage.getItem('websites');
+        if (savedWebsites) {
+            websites = JSON.parse(savedWebsites);
+        }
+        
+        // DOM元素
+        const websitesContainer = document.getElementById('websitesContainer');
+        const siteCountElement = document.getElementById('siteCount');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const searchInfo = document.getElementById('searchInfo');
+        const themeToggle = document.getElementById('themeToggle');
+        const addSiteBtn = document.getElementById('addSiteBtn');
+        const addSiteModal = document.getElementById('addSiteModal');
+        const closeModal = document.getElementById('closeModal');
+        const addSiteForm = document.getElementById('addSiteForm');
+        
+        // 当前状态
+        let currentCategory = 'all';
+        let currentSearchQuery = '';
+        
+        // 初始化网站卡片
+        function renderWebsites() {
+            websitesContainer.innerHTML = '';
+            
+            // 过滤网站数据
+            let filteredWebsites = websites;
+            
+            // 应用分类筛选
+            if (currentCategory !== 'all') {
+                filteredWebsites = filteredWebsites.filter(site => site.category === currentCategory);
+            }
+            
+            // 应用搜索过滤
+            if (currentSearchQuery) {
+                const query = currentSearchQuery.toLowerCase();
+                filteredWebsites = filteredWebsites.filter(site => 
+                    site.name.toLowerCase().includes(query) || 
+                    site.desc.toLowerCase().includes(query) ||
+                    getCategoryName(site.category).toLowerCase().includes(query)
+                );
+            }
+            
+            // 渲染结果
+            if (filteredWebsites.length === 0) {
+                websitesContainer.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <p>没有找到匹配的网站</p>
+                        <p>尝试使用不同的关键词或添加新网站</p>
+                    </div>
+                `;
+            } else {
+                filteredWebsites.forEach(site => {
+                    const card = document.createElement('div');
+                    card.className = `website-card ${site.category === 'games' ? 'game-card' : ''}`;
+                    card.innerHTML = `
+                        <div class="website-icon">
+                            <i class="${site.icon}"></i>
+                        </div>
+                        <div class="website-name">${site.name}</div>
+                        <div class="website-desc">${site.desc}</div>
+                        <span class="website-category">${getCategoryName(site.category)}</span>
+                        <a href="${site.url}" target="_blank" class="visit-btn">访问网站</a>
+                    `;
+                    websitesContainer.appendChild(card);
+                });
+            }
+            
+            // 更新计数
+            siteCountElement.textContent = websites.length;
+            
+            // 更新搜索信息
+            updateSearchInfo();
+        }
+        
+        // 更新搜索信息
+        function updateSearchInfo() {
+            if (currentSearchQuery) {
+                searchInfo.textContent = `搜索关键词: "${currentSearchQuery}"`;
+            } else if (currentCategory !== 'all') {
+                searchInfo.textContent = `当前分类: ${getCategoryName(currentCategory)}`;
+            } else {
+                searchInfo.textContent = "搜索所有已添加的网站";
+            }
+        }
+        
+        // 获取分类名称
+        function getCategoryName(category) {
+            const names = {
+                'games': '游戏',
+                'social': '社交',
+                'shopping': '购物',
+                'entertainment': '娱乐',
+                'news': '新闻',
+                'education': '学习',
+                'tools': '工具',
+                'work': '工作'
+            };
+            return names[category] || category;
+        }
+        
+        // 分类筛选
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // 移除所有active类
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                // 为当前按钮添加active类
+                button.classList.add('active');
+                // 更新当前分类
+                currentCategory = button.dataset.category;
+                // 重新渲染网站
+                renderWebsites();
+            });
+        });
+        
+        // 搜索功能
+        function performSearch() {
+            currentSearchQuery = searchInput.value.trim().toLowerCase();
+            renderWebsites();
+        }
+        
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // 实时搜索
+        searchInput.addEventListener('input', () => {
+            currentSearchQuery = searchInput.value.trim().toLowerCase();
+            if (currentSearchQuery === '') {
+                renderWebsites();
+            }
+        });
+        
+        // 主题切换
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            
+            const icon = themeToggle.querySelector('i');
+            const text = themeToggle.querySelector('span');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                icon.className = 'fas fa-sun';
+                text.textContent = '浅色模式';
+            } else {
+                icon.className = 'fas fa-moon';
+                text.textContent = '深色模式';
+            }
+        });
+        
+        // 添加网站功能
+        addSiteBtn.addEventListener('click', () => {
+            addSiteModal.style.display = 'flex';
+        });
+        
+        closeModal.addEventListener('click', () => {
+            addSiteModal.style.display = 'none';
+        });
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', (e) => {
+            if (e.target === addSiteModal) {
+                addSiteModal.style.display = 'none';
+            }
+        });
+        
+        // 表单提交
+        addSiteForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newSite = {
+                name: document.getElementById('siteName').value,
+                url: document.getElementById('siteUrl').value,
+                desc: document.getElementById('siteDesc').value || '一个实用的网站',
+                category: document.getElementById('siteCategory').value,
+                icon: document.getElementById('siteIcon').value || 'fas fa-globe'
+            };
+            
+            websites.push(newSite);
+            
+            // 保存到本地存储
+            localStorage.setItem('websites', JSON.stringify(websites));
+            
+            // 重新渲染
+            renderWebsites();
+            
+            // 重置表单并关闭模态框
+            addSiteForm.reset();
+            addSiteModal.style.display = 'none';
+            
+            // 显示成功提示
+            alert(`"${newSite.name}" 已成功添加到网址导航！`);
+        });
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', () => {
+            renderWebsites();
+            
+            // 检查系统主题偏好
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.body.classList.add('dark-mode');
+                themeToggle.querySelector('i').className = 'fas fa-sun';
+                themeToggle.querySelector('span').textContent = '浅色模式';
+            }
+        });
+    </script>
+</body>
+</html>
